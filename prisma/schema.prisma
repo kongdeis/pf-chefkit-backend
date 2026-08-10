@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER // 일반회원
+  CHEF // 쉐프
+  ADMIN // 관리자
+}
+
+enum Unit {
+  EA
+  G1
+  G10
+  G100
+  KG1
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  COMPLETED
+  CANCELED
+}
+
+model Member {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(50)
+  email     String   @unique @db.VarChar(255)
+  uuid      String   @unique @default(uuid())
+  password  String
+  address   String?  @db.VarChar(255)
+  phone     String?  @db.VarChar(20)
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  mealkits Mealkit[]
+  orders   Order[]
+}
+
+model Ingredient {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(50)
+  location  String   @db.VarChar(50)
+  unit      Unit
+  unitPrice Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  mealkitIngredients MealkitIngredient[]
+
+  @@unique([name, location])
+}
+
+model Mealkit {
+  id          Int      @id @default(autoincrement())
+  chefId      Int
+  chef        Member   @relation(fields: [chefId], references: [id])
+  name        String   @db.VarChar(100)
+  recipe      String
+  description String   @db.VarChar(255)
+  price       Int
+  orderCount  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  mealkitIngredients MealkitIngredient[]
+  orderItems         OrderItem[]
+
+  @@index([chefId])
+}
+
+model MealkitIngredient {
+  mealkitId    Int
+  ingredientId Int
+
+  mealkit    Mealkit    @relation(fields: [mealkitId], references: [id])
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+  quantity   Int
+  price      Int
+
+  @@id([mealkitId, ingredientId])
+}
+
+model Order {
+  id Int @id @default(autoincrement())
+
+  memberId Int
+  member   Member @relation(fields: [memberId], references: [id])
+
+  totalPrice Int
+  status     OrderStatus @default(PENDING)
+
+  orderedAt DateTime @default(now())
+
+  orderItems OrderItem[]
+
+  @@index([memberId])
+}
+
+model OrderItem {
+  id Int @id @default(autoincrement())
+
+  orderId   Int
+  mealkitId Int
+
+  quantity  Int
+  unitPrice Int
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  mealkit Mealkit @relation(fields: [mealkitId], references: [id])
+
+  @@index([orderId])
+  @@index([mealkitId])
+}
