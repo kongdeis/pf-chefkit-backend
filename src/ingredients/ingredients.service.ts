@@ -1,84 +1,88 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateIngredientDto } from './dto/create-ingredient.dto';
-import { UpdateIngredientDto } from './dto/update-ingredient.dto';
-import { PrismaService } from '../prisma/prisma.service';
-import { AuthMember } from '../common/current-member.decorator';
-import { SearchIngredientDto } from './dto/search-ingredient.dto';
-import { contains } from 'class-validator';
-
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { CreateIngredientDto } from "./dto/create-ingredient.dto";
+import { UpdateIngredientDto } from "./dto/update-ingredient.dto";
+import { PrismaService } from "../prisma/prisma.service";
+import { AuthMember } from "../common/current-member.decorator";
+import { SearchIngredientDto } from "./dto/search-ingredient.dto";
+import { contains } from "class-validator";
 
 @Injectable()
 export class IngredientsService {
-  constructor(private readonly prisma: PrismaService){}
-
+  constructor(private readonly prisma: PrismaService) {}
 
   // 재료 등록은 관리자만 가능
   async create(createIngredientDto: CreateIngredientDto, member: AuthMember) {
     // 관리자 권한 확인
-    const {role} = await member;
-    if(role != 'ADMIN') throw new ForbiddenException(`재료 등록 권한이 없습니다.`)
+    const { role } = await member;
+    if (role != "ADMIN")
+      throw new ForbiddenException(`재료 등록 권한이 없습니다.`);
 
     // 등록된 재료인지 확인
     const exist = await this.prisma.ingredient.findUnique({
       where: {
         name_location: {
           name: createIngredientDto.name,
-          location: createIngredientDto.location
-        }
-      }
+          location: createIngredientDto.location,
+        },
+      },
     });
-    if(exist) throw new ConflictException(`이미 등록된 재료입니다`)
-    return this.prisma.ingredient.create({data: createIngredientDto});
+    if (exist) throw new ConflictException(`이미 등록된 재료입니다`);
+    return this.prisma.ingredient.create({ data: createIngredientDto });
   }
 
   async findAll(member: AuthMember, query: SearchIngredientDto) {
-    // 관리자or쉐프 권한 확인
-    const {role} = member;
-    const allowedRoles = ['ADMIN', 'CHEF'];
-    if(!allowedRoles.includes(role)) throw new ForbiddenException(`재료 열람 권한이 없습니다.`)
+    // 관리자or셰프 권한 확인
+    const { role } = member;
+    const allowedRoles = ["ADMIN", "CHEF"];
+    if (!allowedRoles.includes(role))
+      throw new ForbiddenException(`재료 열람 권한이 없습니다.`);
 
     const where: any = {};
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
 
-
-    let orderBy: any = { updatedAt: 'desc' };
+    let orderBy: any = { updatedAt: "desc" };
 
     switch (query.sort) {
-      case 'createOldest':
-        orderBy = { createdAt: 'asc' };
+      case "createOldest":
+        orderBy = { createdAt: "asc" };
         break;
 
-      case 'updateOldest':
-        orderBy = { updatedAt: 'asc' };
+      case "updateOldest":
+        orderBy = { updatedAt: "asc" };
         break;
 
-      case 'createLatest':
-        orderBy = { createdAt: 'desc' };
+      case "createLatest":
+        orderBy = { createdAt: "desc" };
         break;
 
-      case 'updateLatest':
-        orderBy = { updatedAt: 'desc' };
+      case "updateLatest":
+        orderBy = { updatedAt: "desc" };
         break;
 
-      case 'priceHigh':
-        orderBy = { unitPrice: 'desc' };
+      case "priceHigh":
+        orderBy = { unitPrice: "desc" };
         break;
 
-      case 'priceLow':
-        orderBy = { unitPrice: 'asc' };
+      case "priceLow":
+        orderBy = { unitPrice: "asc" };
         break;
 
       default:
-        orderBy = { updatedAt: 'desc' };
+        orderBy = { updatedAt: "desc" };
     }
 
-    if(query.name){
-      where.name = {contains:query.name, mode: 'insensitive'};
+    if (query.name) {
+      where.name = { contains: query.name, mode: "insensitive" };
     }
 
-    if(query.location){
-      where.location = {contains: query.location, mode: 'insensitive'};
+    if (query.location) {
+      where.location = { contains: query.location, mode: "insensitive" };
     }
 
     const [items, total] = await Promise.all([
@@ -100,29 +104,27 @@ export class IngredientsService {
     };
   }
 
-  findOneAuth(id: number, member: AuthMember){
-    // 관리자or쉐프 권한 확인
-    const {role} = member;
-    const allowedRoles = ['ADMIN', 'CHEF'];
-    if(!allowedRoles.includes(role)) throw new ForbiddenException(`재료 열람 권한이 없습니다.`)
+  findOneAuth(id: number, member: AuthMember) {
+    // 관리자or셰프 권한 확인
+    const { role } = member;
+    const allowedRoles = ["ADMIN", "CHEF"];
+    if (!allowedRoles.includes(role))
+      throw new ForbiddenException(`재료 열람 권한이 없습니다.`);
     return this.findOne(id);
   }
 
   findOne(id: number) {
     const ingredient = this.prisma.ingredient.findUnique({
-      where: {id}
-    })
-    if(!ingredient) throw new NotFoundException(`재료 아이디 ${id} 찾을 수 없습니다`)
+      where: { id },
+    });
+    if (!ingredient)
+      throw new NotFoundException(`재료 아이디 ${id} 찾을 수 없습니다`);
     return ingredient;
   }
 
-  async update(
-    id: number,
-    dto: UpdateIngredientDto,
-    member: AuthMember,
-  ) {
-    if (member.role !== 'ADMIN') {
-      throw new ForbiddenException('재료 수정 권한이 없습니다.');
+  async update(id: number, dto: UpdateIngredientDto, member: AuthMember) {
+    if (member.role !== "ADMIN") {
+      throw new ForbiddenException("재료 수정 권한이 없습니다.");
     }
 
     return this.prisma.$transaction(async (tx) => {
@@ -132,7 +134,7 @@ export class IngredientsService {
       });
 
       if (!ingredient) {
-        throw new NotFoundException('재료를 찾을 수 없습니다.');
+        throw new NotFoundException("재료를 찾을 수 없습니다.");
       }
 
       // 최종 값 계산
@@ -157,7 +159,7 @@ export class IngredientsService {
         });
 
         if (exists) {
-          throw new ConflictException('이미 등록된 재료입니다.');
+          throw new ConflictException("이미 등록된 재료입니다.");
         }
       }
 
@@ -180,7 +182,7 @@ export class IngredientsService {
           where: { ingredientId: id },
         });
 
-        const mealkitIds = [...new Set(affected.map(i => i.mealkitId))];
+        const mealkitIds = [...new Set(affected.map((i) => i.mealkitId))];
 
         for (const mealkitId of mealkitIds) {
           const items = await tx.mealkitIngredient.findMany({
@@ -221,26 +223,27 @@ export class IngredientsService {
 
   async remove(id: number, member: AuthMember) {
     // 관리자 권한 확인
-    const {role} = await member;
-    if(role != 'ADMIN') throw new ForbiddenException(`재료 삭제 권한이 없습니다.`);
+    const { role } = await member;
+    if (role != "ADMIN")
+      throw new ForbiddenException(`재료 삭제 권한이 없습니다.`);
     // 재료 확인
     await this.findOne(id);
     // 사용된 밀키트가 있는지 확인
     const used = await this.prisma.mealkitIngredient.findMany({
-      where : {ingredientId: id},
+      where: { ingredientId: id },
       select: {
-        mealkitId: true
-      }
+        mealkitId: true,
+      },
     });
     // 사용중이면 삭제 금지
-    if(used.length > 0){
-      const mealkitIds = [...new Set(used.map((u)=>u.mealkitId))];
+    if (used.length > 0) {
+      const mealkitIds = [...new Set(used.map((u) => u.mealkitId))];
       throw new ConflictException({
-        message: '이 재료를 사용하는 밀키트가 있어 삭제할 수 없습니다',
-        mealkitIds
-      })
+        message: "이 재료를 사용하는 밀키트가 있어 삭제할 수 없습니다",
+        mealkitIds,
+      });
     }
-    await this.prisma.ingredient.delete({where: {id}});
-    return {deleted: id};
+    await this.prisma.ingredient.delete({ where: { id } });
+    return { deleted: id };
   }
 }

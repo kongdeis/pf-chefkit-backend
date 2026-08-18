@@ -1,21 +1,26 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { AuthMember } from '../common/current-member.decorator';
-import { PrismaService } from '../prisma/prisma.service';
-import { MealkitsService } from '../mealkits/mealkits.service';
-import { SearchOrderDto } from './dto/search-order.dto';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { CreateOrderDto } from "./dto/create-order.dto";
+import { UpdateOrderDto } from "./dto/update-order.dto";
+import { AuthMember } from "../common/current-member.decorator";
+import { PrismaService } from "../prisma/prisma.service";
+import { MealkitsService } from "../mealkits/mealkits.service";
+import { SearchOrderDto } from "./dto/search-order.dto";
 
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly mealkitService: MealkitsService
-  ){}
+    private readonly mealkitService: MealkitsService,
+  ) {}
 
   async create(createOrderDto: CreateOrderDto, member: AuthMember) {
     // 밀키트 확인
-    const {orderItems} = createOrderDto;
+    const { orderItems } = createOrderDto;
     const mealkitIds = await orderItems.map((item) => item.mealkitId);
     const uniqueIds = [...new Set(mealkitIds)];
     const mealkits = await this.prisma.mealkit.findMany({
@@ -28,14 +33,14 @@ export class OrdersService {
 
     if (uniqueIds.length !== mealkits.length) {
       throw new BadRequestException(
-        '존재하지 않는 밀키트가 포함되어 있습니다.',
+        "존재하지 않는 밀키트가 포함되어 있습니다.",
       );
     }
-    const mealkitPriceMap = new Map(mealkits.map(i => [i.id, i.price]));
+    const mealkitPriceMap = new Map(mealkits.map((i) => [i.id, i.price]));
 
-     // transaction을 감싸서 작업할 준비
+    // transaction을 감싸서 작업할 준비
     return this.prisma.$transaction(async (tx) => {
-      let totalOrderPrice = 0;  // 전체 주문 가격
+      let totalOrderPrice = 0; // 전체 주문 가격
 
       // 가격 계산
       const orderItemsTemp = orderItems.map((item) => {
@@ -46,78 +51,75 @@ export class OrdersService {
         return {
           mealkitId: item.mealkitId,
           quantity: item.quantity,
-          unitPrice
-        }
-      })
+          unitPrice,
+        };
+      });
 
       // order 생성
       const order = await tx.order.create({
         data: {
           memberId: member.id,
           totalPrice: totalOrderPrice,
-        }
-      })
-
+        },
+      });
 
       // orderItem 데이터
       const orderItemData = orderItemsTemp.map((item) => ({
         ...item,
-        orderId: order.id
+        orderId: order.id,
       }));
 
       await tx.orderItem.createMany({
-        data: orderItemData
-      })
+        data: orderItemData,
+      });
 
       // mealkit테이블에서 주문수 증가
       await Promise.allSettled(
-        orderItems.map(item => 
+        orderItems.map((item) =>
           tx.mealkit.update({
-            where: {id: item.mealkitId},
+            where: { id: item.mealkitId },
             data: {
               orderCount: {
-                increment: item.quantity
-              }
-            }
-          })
-        )
-      )
+                increment: item.quantity,
+              },
+            },
+          }),
+        ),
+      );
 
       return await tx.order.findUnique({
-        where: {id: order.id},
+        where: { id: order.id },
         include: {
           orderItems: {
             include: {
-              mealkit: true
-            }
-          }
-        }
-      })
+              mealkit: true,
+            },
+          },
+        },
+      });
     });
   }
 
-  async findAll(
-    member: AuthMember,
-    query: SearchOrderDto,
-) {
+  async findAll(member: AuthMember, query: SearchOrderDto) {
     // 관리자 권한 확인
-    const {role} = await member;
-    if(role != 'ADMIN') throw new ForbiddenException(`주문 조회 권한이 없습니다.`);
+    const { role } = await member;
+    if (role != "ADMIN")
+      throw new ForbiddenException(`주문 조회 권한이 없습니다.`);
 
     const where: any = {};
 
-    if(query.status){
+    if (query.status) {
       where.status = query.status;
     }
 
-    if(query.memberId){
+    if (query.memberId) {
       where.memberId = query.memberId;
     }
 
     return this.prisma.order.findMany({
       where,
       orderBy: {
-        orderedAt: query.orderByDate ?? 'desc',
+        orderedAt: query.orderByDate ?? "desc",
       },
       include: {
         orderItems: {
@@ -130,11 +132,7 @@ export class OrdersService {
     });
   }
 
-  async findMyOrders(
-    member: AuthMember,
-    query: SearchOrderDto,
-  ) {
-
+  async findMyOrders(member: AuthMember, query: SearchOrderDto) {
     return this.prisma.order.findMany({
       where: {
         memberId: member.id,
@@ -152,13 +150,9 @@ export class OrdersService {
     });
   }
 
-  async findChefOrders(
-    member: AuthMember,
-    query: SearchOrderDto,
-  ) {
-
-    if(!['CHEF','ADMIN'].includes(member.role)){
-      throw new ForbiddenException('주문 조회 권한이 없습니다');
+  async findChefOrders(member: AuthMember, query: SearchOrderDto) {
+    if (!["CHEF", "ADMIN"].includes(member.role)) {
+      throw new ForbiddenException("주문 조회 권한이 없습니다");
     }
 
     return this.prisma.order.findMany({
@@ -182,11 +176,9 @@ export class OrdersService {
     });
   }
 
-
-
   findOne(id: number) {
-    const order = this.prisma.order.findUnique({where: {id}});
-    if(!order) throw new NotFoundException(`주문번호 ${id} 찾을 수 없습니다`)
+    const order = this.prisma.order.findUnique({ where: { id } });
+    if (!order) throw new NotFoundException(`주문번호 ${id} 찾을 수 없습니다`);
     return order;
   }
 
@@ -198,11 +190,10 @@ export class OrdersService {
     return `This action removes a #${id} order`;
   }
 
-
   // 주문 상세 정보
-  async findOneDetail(id:number){
+  async findOneDetail(id: number) {
     const order = await this.prisma.order.findUnique({
-      where: {id},
+      where: { id },
       include: {
         member: {
           select: {
@@ -211,38 +202,37 @@ export class OrdersService {
             email: true,
             address: true,
             phone: true,
-            role: true
-          }
+            role: true,
+          },
         },
         orderItems: {
           include: {
-            mealkit: true
-          }
-        }
-      }
+            mealkit: true,
+          },
+        },
+      },
     });
-    if(!order) throw new NotFoundException(`주문번호 ${id}를 찾을 수 없습니다`)
+    if (!order)
+      throw new NotFoundException(`주문번호 ${id}를 찾을 수 없습니다`);
     return order;
   }
 
-
-
   // 주문 상태 수정
-  async updateStatus(id: number, dto: UpdateOrderDto, member: AuthMember){
+  async updateStatus(id: number, dto: UpdateOrderDto, member: AuthMember) {
     // 관리자 권한 확인
-    const {role} = await member;
-    if(role != 'ADMIN') throw new ForbiddenException(`주문 수정 권한이 없습니다.`);
-    
+    const { role } = await member;
+    if (role != "ADMIN")
+      throw new ForbiddenException(`주문 수정 권한이 없습니다.`);
+
     const order = await this.findOne(id);
-    
-    console.log('---cancel order---', order)
+
+    console.log("---cancel order---", order);
 
     return this.prisma.order.update({
-      where: {id},
+      where: { id },
       data: {
-        status: dto.status
-      }
-    })
+        status: dto.status,
+      },
+    });
   }
-
 }

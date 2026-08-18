@@ -2,12 +2,12 @@ import {
   ConflictException,
   Injectable,
   UnauthorizedException,
-} from '@nestjs/common';
-import { MembersService } from '../members/members.service';
-import { JwtService } from '@nestjs/jwt';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import * as bcrypt from 'bcrypt';
+} from "@nestjs/common";
+import { MembersService } from "../members/members.service";
+import { JwtService } from "@nestjs/jwt";
+import { RegisterDto } from "./dto/register.dto";
+import { LoginDto } from "./dto/login.dto";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class AuthService {
@@ -31,12 +31,12 @@ export class AuthService {
       password: hashed,
       address: dto.address,
       phone: dto.phone,
-      role: dto.role ?? 'USER',
+      role: dto.role ?? "USER",
     });
 
     // 비밀번호 빼고 나머지 데이터 반환
     const { password, ...result } = await user;
-    console.log('---result---', result);
+    console.log("---result---", result);
     return result;
   }
 

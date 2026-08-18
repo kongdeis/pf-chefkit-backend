@@ -227,7 +227,7 @@ sort: latest, oldest, priceHigh, priceLow, popular
         "updatedAt": "2026-06-21T08:09:54.749Z",
         "chef": {
             "id": 6,
-            "name": "최강쉐프",
+            "name": "최강셰프",
             "email": "bestchef@chef.com"
         },
         "mealkitIngredients": [
