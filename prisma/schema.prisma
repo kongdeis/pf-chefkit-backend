@@ -15,7 +15,7 @@ datasource db {
 
 enum Role {
   USER // 일반회원
-  CHEF // 쉐프
+  CHEF // 셰프
   ADMIN // 관리자
 }
 
