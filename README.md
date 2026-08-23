@@ -23,7 +23,8 @@
 [Auth API 바로보기](./readme/api-auth.md)<br/>
 [회원 API 바로보기](./readme/api-member.md)<br/>
 [재료 API 바로보기](./readme/api-ingredients.md)<br/>
-[밀키트 API 바로보기](./readme/api-member.md)<br/>
+[밀키트 API 바로보기](./readme/api-mealkits.md)<br/>
+[주문 API 바로보기](./readme/api-orders.md)<br/>
 
 
 ## 기술 스택
