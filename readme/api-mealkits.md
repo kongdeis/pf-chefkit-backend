@@ -1,15 +1,19 @@
 # chefkit API
 
+## mealkits
 
-### <span style="color: red;">**mealkits**</span>
+### [POST] /mealkits — 밀키트 등록
 
-#### **[POST]** /mealkits 밀키트 등록 (ADMIN/CHEF)
-**Request**
+**권한:** ADMIN / CHEF  
+**인증:** 필요 (`Bearer Token`)
+
+#### Request
+
 ```json
 {
   "name": "매콤 투움바 파스타",
-  "recipe": "1. 파스타면을 삶는다. 2. 생크림에 진간장, 고춧가루를 섞어 소스를 만든다. 3. 올리브유에 새우, 양파, 마늘을 볶다가 소스와 면을 넣어 졸인다.",
-  "description": "아웃백 부럽지 않은 매콤하고 꾸덕한 크림 파스타",
+  "recipe": "파스타면을 삶고 소스를 만든 뒤 재료와 함께 볶아 완성한다.",
+  "description": "매콤하고 꾸덕한 크림 파스타",
   "mealkitIngredients": [
     {
       "ingredientId": 122,
@@ -25,299 +29,609 @@
     }
   ]
 }
-
 ```
-**Response**
+
+#### Request Fields
+
+| key | type | 필수 | 설명 |
+|---|---|---|---|
+| name | String | O | 밀키트 이름 (2~100자) |
+| recipe | String | O | 조리법 (최소 2자) |
+| description | String | O | 밀키트 설명 (2~255자) |
+| mealkitIngredients | Array | O | 밀키트에 포함할 재료 목록 |
+| mealkitIngredients[].ingredientId | Int | O | 재료 ID (1 이상) |
+| mealkitIngredients[].quantity | Int | O | 재료 수량 (1 이상) |
+
+#### Response
+
 ```json
 {
-    "message": "success",
-    "statusCode": 200,
-    "chefkit": {
-        "id": 12,
-        "chefId": 4,
-        "name": "매콤 투움바 파스타",
-        "recipe": "1. 파스타면을 삶는다. 2. 생크림에 진간장, 고춧가루를 섞어 소스를 만든다. 3. 올리브유에 새우, 양파, 마늘을 볶다가 소스와 면을 넣어 졸인다.",
-        "description": "아웃백 부럽지 않은 매콤하고 꾸덕한 크림 파스타",
-        "price": 4000,
-        "orderCount": 0,
-        "createdAt": "2026-08-10T01:55:38.203Z",
-        "updatedAt": "2026-08-10T01:55:38.203Z",
-        "mealkitIngredients": [
-            {
-                "mealkitId": 12,
-                "ingredientId": 122,
-                "quantity": 2,
-                "price": 1400,
-                "ingredient": {
-                    "id": 122,
-                    "name": "파스타면",
-                    "location": "국내산",
-                    "unit": "G100",
-                    "unitPrice": 700,
-                    "createdAt": "2026-06-19T10:42:46.821Z",
-                    "updatedAt": "2026-06-19T10:42:46.821Z"
-                }
-            },
-            {
-                "mealkitId": 12,
-                "ingredientId": 138,
-                "quantity": 1,
-                "price": 1100,
-                "ingredient": {
-                    "id": 138,
-                    "name": "토마토소스",
-                    "location": "이탈리아",
-                    "unit": "G100",
-                    "unitPrice": 1100,
-                    "createdAt": "2026-06-19T10:42:46.821Z",
-                    "updatedAt": "2026-06-19T10:42:46.821Z"
-                }
-            },
-            {
-                "mealkitId": 12,
-                "ingredientId": 113,
-                "quantity": 1,
-                "price": 1500,
-                "ingredient": {
-                    "id": 113,
-                    "name": "고춧가루",
-                    "location": "중국",
-                    "unit": "G100",
-                    "unitPrice": 1500,
-                    "createdAt": "2026-06-19T10:42:46.821Z",
-                    "updatedAt": "2026-06-19T10:42:46.821Z"
-                }
-            }
-        ]
+  "id": 12,
+  "chefId": 4,
+  "name": "매콤 투움바 파스타",
+  "recipe": "파스타면을 삶고 소스를 만든 뒤 재료와 함께 볶아 완성한다.",
+  "description": "매콤하고 꾸덕한 크림 파스타",
+  "price": 4000,
+  "orderCount": 0,
+  "createdAt": "2026-08-10T01:55:38.203Z",
+  "updatedAt": "2026-08-10T01:55:38.203Z",
+  "mealkitIngredients": [
+    {
+      "mealkitId": 12,
+      "ingredientId": 122,
+      "quantity": 2,
+      "price": 1400,
+      "ingredient": {
+        "id": 122,
+        "name": "파스타면",
+        "location": "국내산",
+        "unit": "G100",
+        "unitPrice": 700,
+        "createdAt": "2026-06-19T10:42:46.821Z",
+        "updatedAt": "2026-06-19T10:42:46.821Z"
+      }
+    },
+    {
+      "mealkitId": 12,
+      "ingredientId": 138,
+      "quantity": 1,
+      "price": 1100,
+      "ingredient": {
+        "id": 138,
+        "name": "토마토소스",
+        "location": "이탈리아",
+        "unit": "G100",
+        "unitPrice": 1100,
+        "createdAt": "2026-06-19T10:42:46.821Z",
+        "updatedAt": "2026-06-19T10:42:46.821Z"
+      }
     }
+  ]
 }
 ```
-<br/>
 
-#### **[GET]** /mealkits/ 밀키트 목록 조회 (ADMIN/CHEF/USER)
-**Params**
-| key    | type   | 기본값 | 필수여부 |
-| ------ | ------ | ------ | -------- |
-| sort   | Enum   |        |
-| name   | String |        |
-| search | String |        |
+#### Error
 
-sort: latest, oldest, priceHigh, priceLow, popular
+존재하지 않는 재료가 포함된 경우:
 
-**Response**
 ```json
 {
-    "message": "success",
-    "statusCode": 200,
-    "chefkit": {
-        "items": [
-            {
-                "id": 6,
-                "chefId": 6,
-                "name": "차돌박이 된장찌개",
-                "recipe": "1. 차돌박이를 구워 기름을 낸다. 2. 된장을 풀고 무, 두부를 넣는다. 3. 대파와 청양고추를 넣어 칼칼하게 끓인다.",
-                "description": "고깃집에서 먹던 바로 그 진하고 구수한 된장찌개",
-                "price": 5600,
-                "orderCount": 7,
-                "createdAt": "2026-06-19T05:24:24.637Z",
-                "updatedAt": "2026-06-21T08:09:54.749Z"
-            },
-            {
-                "id": 3,
-                "chefId": 3,
-                "name": "김치찌개",
-                "recipe": "1. 돼지고기를 참기름에 볶는다. 2. 신김치와 양파를 넣고 함께 볶는다. 3. 육수를 붓고 대파와 마늘을 넣어 푹 끓인다.",
-                "description": "깊은 맛의 육수와 묵은지가 어우러진 밥도둑 김치찌개",
-                "price": 38600,
-                "orderCount": 4,
-                "createdAt": "2026-06-19T05:12:46.687Z",
-                "updatedAt": "2026-06-21T08:09:54.749Z"
-            },
-            {
-                "id": 4,
-                "chefId": 3,
-                "name": "매콤 달콤 돼지갈비찜",
-                "recipe": "1. 갈비를 핏물을 빼고 데친다. 2. 간장 양념장과 감자, 당근을 넣는다. 3. 마늘과 대파를 넣고 약불로 졸인다",
-                "description": "명절에 먹던 그 부드럽고 매운 갈비찜 맛 그대로",
-                "price": 15600,
-                "orderCount": 2,
-                "createdAt": "2026-06-19T05:18:26.132Z",
-                "updatedAt": "2026-06-21T08:02:02.474Z"
-            },
-            {
-                "id": 8,
-                "chefId": 6,
-                "name": "진한 소고기 미역국",
-                "recipe": "1. 참기름에 소고기 국거리를 달달 볶는다. 2. 불린 미역을 넣고 함께 볶다 육수를 붓는다. 3. 다진마늘과 국간장으로 간한다.",
-                "description": "어머니가 끓여주시던 깊고 진한 미역국",
-                "price": 10000,
-                "orderCount": 1,
-                "createdAt": "2026-06-19T05:28:06.725Z",
-                "updatedAt": "2026-06-21T08:01:40.546Z"
-            },
-            {
-                "id": 12,
-                "chefId": 4,
-                "name": "매콤 투움바 파스타",
-                "recipe": "1. 파스타면을 삶는다. 2. 생크림에 진간장, 고춧가루를 섞어 소스를 만든다. 3. 올리브유에 새우, 양파, 마늘을 볶다가 소스와 면을 넣어 졸인다.",
-                "description": "아웃백 부럽지 않은 매콤하고 꾸덕한 크림 파스타",
-                "price": 4000,
-                "orderCount": 0,
-                "createdAt": "2026-08-10T01:55:38.203Z",
-                "updatedAt": "2026-08-10T01:55:38.203Z"
-            },
-            {
-                "id": 9,
-                "chefId": 3,
-                "name": "정통 이탈리안 까르보나라",
-                "recipe": "1. 파스타면을 소금물에 삶는다. 2. 팬에 올리브유를 두르고 돼지 목살(혹은 베컨)과 마늘을 볶는다. 3. 불을 끄고 면, 계란 노른자, 파르메산 치즈가루를 재빨리 섞는다.",
-                "description": "크림 없이 계란 노른자와 치즈로만 맛을 낸 정통 로마식 까르보나라",
-                "price": 10500,
-                "orderCount": 0,
-                "createdAt": "2026-06-21T01:49:01.732Z",
-                "updatedAt": "2026-06-21T01:49:01.732Z"
-            },
-            {
-                "id": 11,
-                "chefId": 4,
-                "name": "전복 버터구이",
-                "recipe": "1. 전복을 손질한다. 2. 버터를 녹인 팬에 전복을 굽는다. 3. 마늘을 넣고 향을 입혀 완성한다.",
-                "description": "고급 일식집 스타일 전복 버터구이",
-                "price": 27700,
-                "orderCount": 0,
-                "createdAt": "2026-06-22T02:15:09.634Z",
-                "updatedAt": "2026-06-22T02:15:09.634Z"
-            },
-            {
-                "id": 7,
-                "chefId": 6,
-                "name": "뚝배기 소불고기",
-                "recipe": "1. 소고기를 간장, 설탕 양념에 재운다. 2. 양파, 팽이버섯, 대파를 썰어 넣는다. 3. 자작하게 국물을 남겨 끓인다.",
-                "description": "단짠단짠의 정석, 남녀노소 좋아하는 불고기",
-                "price": 43550,
-                "orderCount": 0,
-                "createdAt": "2026-06-19T05:26:26.830Z",
-                "updatedAt": "2026-06-20T09:13:36.064Z"
-            }
-        ],
-        "total": 8,
-        "page": 1,
-        "limit": 10,
-        "totalPages": 1
+  "message": "존재하지 않는 재료가 포함되어 있습니다",
+  "error": "Bad Request",
+  "statusCode": 400
+}
+```
+
+권한이 없는 경우:
+
+```json
+{
+  "message": "밀키트 등록 권한이 없습니다.",
+  "error": "Forbidden",
+  "statusCode": 403
+}
+```
+
+---
+
+### [GET] /mealkits — 밀키트 목록 조회
+
+**권한:** ADMIN / CHEF / USER  
+**인증:** 불필요
+
+#### Params
+
+| key | type | 기본값 | 필수 | 설명 |
+|---|---|---:|---|---|
+| page | Int | 1 | X | 페이지 번호 |
+| limit | Int | 10 | X | 페이지당 조회 개수 |
+| sort | Enum | latest | X | 정렬 방식 |
+| name | String | - | X | 이름 검색 |
+| search | String | - | X | 이름/레시피/설명 통합 검색 |
+
+#### sort
+
+| 값 | 설명 |
+|---|---|
+| latest | 최근 수정순 |
+| oldest | 오래된 수정순 |
+| priceHigh | 가격 높은순 |
+| priceLow | 가격 낮은순 |
+| popular | 주문 횟수 높은순 |
+
+> `latest`는 Service에서 별도 처리하지 않지만 기본값인 `updatedAt desc`와 동일하게 동작합니다.
+
+#### Example
+
+```http
+GET /mealkits?page=1&limit=10&sort=popular&search=김치
+```
+
+#### Response
+
+```json
+{
+  "items": [
+    {
+      "id": 6,
+      "chefId": 6,
+      "name": "차돌박이 된장찌개",
+      "recipe": "차돌박이와 된장을 넣고 끓여 완성한다.",
+      "description": "진하고 구수한 된장찌개",
+      "price": 5600,
+      "orderCount": 7,
+      "createdAt": "2026-06-19T05:24:24.637Z",
+      "updatedAt": "2026-06-21T08:09:54.749Z"
+    },
+    {
+      "id": 3,
+      "chefId": 3,
+      "name": "김치찌개",
+      "recipe": "돼지고기와 김치를 볶은 후 육수를 넣고 끓인다.",
+      "description": "깊은 맛의 김치찌개",
+      "price": 38600,
+      "orderCount": 4,
+      "createdAt": "2026-06-19T05:12:46.687Z",
+      "updatedAt": "2026-06-21T08:09:54.749Z"
     }
+  ],
+  "total": 8,
+  "page": 1,
+  "limit": 10,
+  "totalPages": 1
 }
 ```
-<br/>
 
-#### **[GET]** /mealkits/:id 밀키트 id 조회
-**Reponse**
-```json
-{
-    "message": "success",
-    "statusCode": 200,
-    "chefkit": {
-        "id": 6,
-        "chefId": 6,
-        "name": "차돌박이 된장찌개",
-        "recipe": "1. 차돌박이를 구워 기름을 낸다. 2. 된장을 풀고 무, 두부를 넣는다. 3. 대파와 청양고추를 넣어 칼칼하게 끓인다.",
-        "description": "고깃집에서 먹던 바로 그 진하고 구수한 된장찌개",
-        "price": 5600,
-        "orderCount": 7,
-        "createdAt": "2026-06-19T05:24:24.637Z",
-        "updatedAt": "2026-06-21T08:09:54.749Z",
-        "chef": {
-            "id": 6,
-            "name": "최강셰프",
-            "email": "bestchef@chef.com"
-        },
-        "mealkitIngredients": [
-            {
-                "mealkitId": 6,
-                "ingredientId": 155,
-                "quantity": 1,
-                "price": 2800,
-                "ingredient": {
-                    "id": 155,
-                    "name": "국물용 멸치",
-                    "location": "통영",
-                    "unit": "G100",
-                    "unitPrice": 2800,
-                    "createdAt": "2026-06-19T10:45:42.326Z",
-                    "updatedAt": "2026-06-19T10:45:42.326Z"
-                }
-            },
-            {
-                "mealkitId": 6,
-                "ingredientId": 106,
-                "quantity": 1,
-                "price": 1600,
-                "ingredient": {
-                    "id": 106,
-                    "name": "된장",
-                    "location": "괴산",
-                    "unit": "G100",
-                    "unitPrice": 1600,
-                    "createdAt": "2026-06-19T10:42:46.821Z",
-                    "updatedAt": "2026-06-19T10:42:46.821Z"
-                }
-            },
-            {
-                "mealkitId": 6,
-                "ingredientId": 98,
-                "quantity": 1,
-                "price": 1200,
-                "ingredient": {
-                    "id": 98,
-                    "name": "두부",
-                    "location": "미국",
-                    "unit": "EA",
-                    "unitPrice": 1200,
-                    "createdAt": "2026-06-19T10:39:39.436Z",
-                    "updatedAt": "2026-06-19T10:39:39.436Z"
-                }
-            }
-        ]
-    }
-}
-```
-<br/>
+---
 
-#### **[PATCH]** /mealkits/:id 밀키트 id 정보 수정
-**Request**
-```json
-{
-    "name": "김치찌개"
-}
-```
-**Reponse**
-```json
-{
-    "message": "success",
-    "statusCode": 200,
-    "chefkit": {
-        "id": 3,
-        "chefId": 3,
-        "name": "김치찌개",
-        "recipe": "1. 돼지고기를 참기름에 볶는다. 2. 신김치와 양파를 넣고 함께 볶는다. 3. 육수를 붓고 대파와 마늘을 넣어 푹 끓인다.",
-        "description": "깊은 맛의 육수와 묵은지가 어우러진 밥도둑 김치찌개",
-        "price": 38600,
-        "orderCount": 4,
-        "createdAt": "2026-06-19T05:12:46.687Z",
-        "updatedAt": "2026-08-10T01:59:27.833Z"
-    }
-}
-```
-<br/>
+### [GET] /mealkits/chef — 내가 등록한 밀키트 목록 조회
 
-#### **[DELETE]** /mealkits/:id 밀키트 삭제
-**Reponse**
+**권한:** 로그인한 CHEF  
+**인증:** 필요 (`Bearer Token`)
+
+> 현재 Controller와 Service에 별도로 구현되어 있는 API입니다.
+
+#### Params
+
+| key | type | 기본값 | 필수 | 설명 |
+|---|---|---:|---|---|
+| page | Int | 1 | X | 페이지 번호 |
+| limit | Int | 10 | X | 페이지당 조회 개수 |
+| sort | Enum | latest | X | 정렬 방식 |
+| name | String | - | X | 밀키트 이름 검색 |
+| search | String | - | X | 이름/레시피/설명 통합 검색 |
+
+#### Example
+
+```http
+GET /mealkits/chef?page=1&limit=10&sort=latest&name=김치
+```
+
+#### Response
+
 ```json
 {
-    "message": "success",
-    "statusCode": 200,
-    "chefkit": {
-        "deleted": 9
+  "items": [
+    {
+      "id": 3,
+      "chefId": 3,
+      "name": "김치찌개",
+      "recipe": "돼지고기와 김치를 볶은 후 육수를 넣고 끓인다.",
+      "description": "깊고 진한 맛의 김치찌개",
+      "price": 38600,
+      "orderCount": 4,
+      "createdAt": "2026-06-19T05:12:46.687Z",
+      "updatedAt": "2026-06-21T08:09:54.749Z"
     }
+  ],
+  "total": 1,
+  "page": 1,
+  "limit": 10,
+  "totalPages": 1
 }
 ```
-<br/>
+
+---
+
+### [GET] /mealkits/:id — 밀키트 상세 조회
+
+**권한:** ADMIN / CHEF / USER  
+**인증:** 불필요
+
+#### Path Parameter
+
+| key | type | 필수 | 설명 |
+|---|---|---|---|
+| id | Int | O | 밀키트 ID |
+
+#### Example
+
+```http
+GET /mealkits/6
+```
+
+#### Response
+
+```json
+{
+  "id": 6,
+  "chefId": 6,
+  "name": "차돌박이 된장찌개",
+  "recipe": "차돌박이와 된장을 넣고 끓여 완성한다.",
+  "description": "진하고 구수한 된장찌개",
+  "price": 5600,
+  "orderCount": 7,
+  "createdAt": "2026-06-19T05:24:24.637Z",
+  "updatedAt": "2026-06-21T08:09:54.749Z",
+  "chef": {
+    "id": 6,
+    "name": "최강셰프",
+    "email": "bestchef@chef.com"
+  },
+  "mealkitIngredients": [
+    {
+      "mealkitId": 6,
+      "ingredientId": 155,
+      "quantity": 1,
+      "price": 2800,
+      "ingredient": {
+        "id": 155,
+        "name": "국물용 멸치",
+        "location": "통영",
+        "unit": "G100",
+        "unitPrice": 2800,
+        "createdAt": "2026-06-19T10:45:42.326Z",
+        "updatedAt": "2026-06-19T10:45:42.326Z"
+      }
+    },
+    {
+      "mealkitId": 6,
+      "ingredientId": 106,
+      "quantity": 1,
+      "price": 1600,
+      "ingredient": {
+        "id": 106,
+        "name": "된장",
+        "location": "괴산",
+        "unit": "G100",
+        "unitPrice": 1600,
+        "createdAt": "2026-06-19T10:42:46.821Z",
+        "updatedAt": "2026-06-19T10:42:46.821Z"
+      }
+    }
+  ]
+}
+```
+
+#### Error
+
+```json
+{
+  "message": "밀키트 999를 찾을 수 없습니다",
+  "error": "Not Found",
+  "statusCode": 404
+}
+```
+
+---
+
+### [PATCH] /mealkits/:id — 밀키트 정보 수정
+
+**권한:** ADMIN / 해당 밀키트를 등록한 CHEF  
+**인증:** 필요 (`Bearer Token`)
+
+#### Path Parameter
+
+| key | type | 필수 | 설명 |
+|---|---|---|---|
+| id | Int | O | 수정할 밀키트 ID |
+
+#### Request
+
+```json
+{
+  "name": "김치찌개"
+}
+```
+
+재료까지 수정하는 경우:
+
+```json
+{
+  "name": "김치찌개",
+  "recipe": "돼지고기와 김치를 볶은 후 육수를 넣고 끓인다.",
+  "description": "깊고 진한 맛의 김치찌개",
+  "mealkitIngredients": [
+    {
+      "ingredientId": 10,
+      "quantity": 2
+    },
+    {
+      "ingredientId": 20,
+      "quantity": 1
+    }
+  ]
+}
+```
+
+#### Request Fields
+
+| key | type | 필수 | 설명 |
+|---|---|---|---|
+| name | String | X | 밀키트 이름 |
+| recipe | String | X | 조리법 |
+| description | String | X | 밀키트 설명 |
+| mealkitIngredients | Array | X | 재료 목록 전체 교체 |
+| mealkitIngredients[].ingredientId | Int | 조건부 | 재료 ID |
+| mealkitIngredients[].quantity | Int | 조건부 | 재료 수량 |
+
+> `mealkitIngredients`를 전달하지 않으면 기존 재료는 유지됩니다.
+>
+> `mealkitIngredients`를 전달하면 기존 재료 목록을 삭제하고 전달받은 재료 목록으로 교체합니다.
+>
+> 재료가 변경되면 재료의 현재 `unitPrice`를 기준으로 밀키트 가격을 다시 계산합니다.
+
+#### Response
+
+```json
+{
+  "id": 3,
+  "chefId": 3,
+  "name": "김치찌개",
+  "recipe": "돼지고기와 김치를 볶은 후 육수를 넣고 끓인다.",
+  "description": "깊고 진한 맛의 김치찌개",
+  "price": 38600,
+  "orderCount": 4,
+  "createdAt": "2026-06-19T05:12:46.687Z",
+  "updatedAt": "2026-08-10T01:59:27.833Z"
+}
+```
+
+#### Error
+
+권한이 없는 경우:
+
+```json
+{
+  "message": "밀키트 수정 권한이 없습니다.",
+  "error": "Forbidden",
+  "statusCode": 403
+}
+```
+
+존재하지 않는 재료가 포함된 경우:
+
+```json
+{
+  "message": "존재하지 않는 재료가 포함되어 있습니다",
+  "error": "Bad Request",
+  "statusCode": 400
+}
+```
+
+---
+
+### [DELETE] /mealkits/:id — 밀키트 삭제
+
+**권한:** ADMIN  
+**인증:** 필요 (`Bearer Token`)
+
+#### Path Parameter
+
+| key | type | 필수 | 설명 |
+|---|---|---|---|
+| id | Int | O | 삭제할 밀키트 ID |
+
+#### Response
+
+```json
+{
+  "deleted": 9
+}
+```
+
+#### 삭제 제한
+
+주문 내역이 있는 밀키트는 삭제할 수 없습니다.
+
+```json
+{
+  "message": "주문내역이 있는 밀키트는 삭제할 수 없습니다",
+  "error": "Bad Request",
+  "statusCode": 400
+}
+```
+
+관리자가 아닌 경우:
+
+```json
+{
+  "message": "밀키트 삭제 권한이 없습니다.",
+  "error": "Forbidden",
+  "statusCode": 403
+}
+```
+
+---
+
+# API 권한 정리
+
+| Method | Endpoint | ADMIN | CHEF | USER | 인증 |
+|---|---|:---:|:---:|:---:|:---:|
+| POST | `/mealkits` | O | O | X | 필요 |
+| GET | `/mealkits` | O | O | O | 불필요 |
+| GET | `/mealkits/chef` | O* | O | X | 필요 |
+| GET | `/mealkits/:id` | O | O | O | 불필요 |
+| PATCH | `/mealkits/:id` | O | O** | X | 필요 |
+| DELETE | `/mealkits/:id` | O | X | X | 필요 |
+
+> `GET /mealkits/chef`는 현재 로그인한 사용자의 `id`를 `chefId`로 사용하여 해당 셰프가 등록한 밀키트를 조회합니다.
+>
+> `PATCH /mealkits/:id`는 ADMIN의 경우 모든 밀키트를 수정할 수 있으며, CHEF는 자신이 등록한 밀키트만 수정할 수 있습니다.
+
+---
+
+# DTO
+
+## CreateMealkitDto
+
+```typescript
+class CreateMealkitIngredientDto {
+  ingredientId: number;
+  quantity: number;
+}
+
+export class CreateMealkitDto {
+  name: string;
+  recipe: string;
+  description: string;
+  mealkitIngredients: CreateMealkitIngredientDto[];
+}
+```
+
+### Validation
+
+| 필드 | Validation |
+|---|---|
+| name | String, 최소 2자, 최대 100자 |
+| recipe | String, 최소 2자 |
+| description | String, 최소 2자, 최대 255자 |
+| mealkitIngredients | Array |
+| ingredientId | Integer, 최소 1 |
+| quantity | Integer, 최소 1 |
+
+---
+
+## SearchMealkitDto
+
+```typescript
+export class SearchMealkitDto extends PageRequestDto {
+  sort?: string;
+  name?: string;
+  search?: string;
+}
+```
+
+### Validation
+
+| 필드 | Validation |
+|---|---|
+| page | 기본값 1 |
+| limit | 기본값 10 |
+| sort | latest, oldest, priceHigh, priceLow, popular |
+| name | String |
+| search | String |
+
+---
+
+# 가격 계산
+
+밀키트 등록 시 각 재료의 `unitPrice`와 요청한 `quantity`를 곱하여 밀키트 가격을 계산합니다.
+
+```text
+재료 가격 = unitPrice × quantity
+
+밀키트 가격 = 모든 재료 가격의 합
+```
+
+예시:
+
+```text
+파스타면     700 × 2 = 1,400원
+토마토소스  1,100 × 1 = 1,100원
+고춧가루    1,500 × 1 = 1,500원
+--------------------------------
+총 가격                  4,000원
+```
+
+따라서 생성된 밀키트의 `price`는 `4000`이 됩니다.
+
+---
+
+# 재료 가격 변경 시
+
+재료의 가격이 변경되면 해당 재료를 사용하는 밀키트의 가격도 다시 계산됩니다.
+
+```text
+재료 unitPrice 변경
+        ↓
+해당 재료를 사용하는 밀키트 조회
+        ↓
+밀키트 재료 가격 재계산
+        ↓
+밀키트 총 가격 재계산
+```
+
+---
+
+# 주요 예외
+
+## 400 Bad Request
+
+### 존재하지 않는 재료
+
+```json
+{
+  "message": "존재하지 않는 재료가 포함되어 있습니다",
+  "error": "Bad Request",
+  "statusCode": 400
+}
+```
+
+### 주문 내역이 있는 밀키트 삭제
+
+```json
+{
+  "message": "주문내역이 있는 밀키트는 삭제할 수 없습니다",
+  "error": "Bad Request",
+  "statusCode": 400
+}
+```
+
+---
+
+## 403 Forbidden
+
+### 밀키트 등록 권한 없음
+
+```json
+{
+  "message": "밀키트 등록 권한이 없습니다.",
+  "error": "Forbidden",
+  "statusCode": 403
+}
+```
+
+### 밀키트 수정 권한 없음
+
+```json
+{
+  "message": "밀키트 수정 권한이 없습니다.",
+  "error": "Forbidden",
+  "statusCode": 403
+}
+```
+
+### 밀키트 삭제 권한 없음
+
+```json
+{
+  "message": "밀키트 삭제 권한이 없습니다.",
+  "error": "Forbidden",
+  "statusCode": 403
+}
+```
+
+---
+
+## 404 Not Found
+
+### 존재하지 않는 밀키트
+
+```json
+{
+  "message": "밀키트 999를 찾을 수 없습니다",
+  "error": "Not Found",
+  "statusCode": 404
+}
+```
