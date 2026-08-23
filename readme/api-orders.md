@@ -367,15 +367,6 @@ GET /orders/all?status=PAID&memberId=7&orderByDate=asc
 ]
 ```
 
-**설명**
-
-현재 `OrdersService.findAll()`에서 실제로 적용되는 검색 조건은 다음과 같습니다.
-
-- `status`
-- `memberId`
-- `orderByDate`
-
-`chefId`, `mealkitId`, `startDate`, `endDate`는 `SearchOrderDto`에는 정의되어 있지만 현재 `findAll()` 서비스에서는 실제 검색 조건으로 사용되지 않습니다.
 
 **Error**
 
